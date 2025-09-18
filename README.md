@@ -111,6 +111,8 @@ python app.py
 
 <img width="1919" height="864" alt="Screenshot 2025-09-18 195224" src="https://github.com/user-attachments/assets/9cb4656d-cab6-4d30-ac84-24bcabb8fdfc" />
 
+<img width="1919" height="863" alt="Screenshot 2025-09-18 200828" src="https://github.com/user-attachments/assets/520e21b0-a8fe-411f-af7a-c84714c5f993" />
+
 <img width="1919" height="1055" alt="Screenshot 2025-09-18 195952" src="https://github.com/user-attachments/assets/77079d41-5ff5-41dd-881f-c82ed818e483" />
 
 <img width="1919" height="1079" alt="Screenshot 2025-09-18 195419" src="https://github.com/user-attachments/assets/5ad8c31f-f305-4503-b96f-ec0b4f71c8cd" />
