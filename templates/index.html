@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Car Inventory</title>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body class="bg-light">
+    <div class="container mt-5">
+      <h1 class="mb-4">Crystal Motors</h1>
+
+      <button id="darkModeToggle" class="btn btn-secondary mb-3 float-end">
+        🌙 Dark Mode
+      </button>
+
+      <!-- Add Car Button -->
+      <a href="{{ url_for('add_car') }}" class="btn btn-info mb-3"
+        >+ Add A New Car</a
+      >
+
+      <!-- Filter & Sort Controls -->
+      <div class="container mb-3 d-flex gap-3">
+        <!-- Search Filter -->
+        <input
+          type="text"
+          id="searchInput"
+          class="form-control w-25"
+          placeholder="Search by model..."
+        />
+
+        <!-- Status Filter -->
+        <select id="statusFilter" class="form-select w-25">
+          <option value="">All Status</option>
+          <option value="available">Available</option>
+          <option value="sold">Sold</option>
+          <option value="reserved">Reserved</option>
+        </select>
+
+        <!-- Sort -->
+        <select id="sortSelect" class="form-select w-25">
+          <option value="">Sort By</option>
+          <option value="priceAsc">Price: Low to High</option>
+          <option value="priceDesc">Price: High to Low</option>
+          <option value="yearDesc">Newest First</option>
+          <option value="yearAsc">Oldest First</option>
+        </select>
+      </div>
+
+      <!-- Cars Table -->
+      <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+          <tr>
+            <th>ID</th>
+            <th>Make</th>
+            <th>Model</th>
+            <th>Year</th>
+            <th>VIN</th>
+            <th>Engine</th>
+            <th>Mileage</th>
+            <th>Color</th>
+            <th>Price</th>
+            <th>Status</th>
+            <th>Photo</th>
+            <th colspan="2">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="carTableBody">
+          {% for car in cars %}
+          <tr
+            data-model="{{ car.model|lower }}"
+            data-status="{{ car.status|lower }}"
+            data-price="{{ car.price }}"
+            data-year="{{ car.year }}"
+          >
+            <td>{{ car.car_id }}</td>
+            <td>{{ car.make }}</td>
+            <td class="car-model">{{ car.model }}</td>
+            <td>{{ car.year }}</td>
+            <td>{{ car.vin }}</td>
+            <td>{{ car.engine }}cc</td>
+            <td>{{ car.mileage }}Km</td>
+            <td>{{ car.color }}</td>
+            <td>${{ car.price }}</td>
+            <td>{{ car.status }}</td>
+            <td>
+              {% if car.photo %}
+              <img
+                src="{{ url_for('static', filename='uploads/' + car.photo) }}"
+                width="100"
+              />
+              {% else %}
+              <span>No Photo</span>
+              {% endif %}
+            </td>
+            <td>
+              <a
+                href="{{ url_for('view_car', car_id=car.car_id) }}"
+                class="btn btn-info btn-sm"
+                >View</a
+              >
+            </td>
+            <td>
+              <a
+                href="{{ url_for('update_car', car_id=car.car_id) }}"
+                class="btn btn-success btn-sm"
+                >Edit</a
+              >
+              <a
+                href="{{ url_for('delete_car', car_id=car.car_id) }}"
+                class="btn btn-danger btn-sm"
+                onclick="return confirm('Are you sure you want to delete this car?');"
+              >
+                Delete
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- JS -->
+    <script>
+      const searchInput = document.getElementById("searchInput");
+      const statusFilter = document.getElementById("statusFilter");
+      const sortSelect = document.getElementById("sortSelect");
+      const carTableBody = document.getElementById("carTableBody");
+
+      searchInput.addEventListener("keyup", filterCars);
+      statusFilter.addEventListener("change", filterCars);
+      sortSelect.addEventListener("change", sortCars);
+
+      function filterCars() {
+        const search = searchInput.value.toLowerCase();
+        const status = statusFilter.value;
+
+        const rows = carTableBody.querySelectorAll("tr");
+
+        rows.forEach((row) => {
+          const model = row.dataset.model;
+          const carStatus = row.dataset.status;
+
+          if (
+            model.includes(search) &&
+            (status === "" || carStatus === status)
+          ) {
+            row.style.display = "";
+          } else {
+            row.style.display = "none";
+          }
+        });
+      }
+
+      function sortCars() {
+        const sortType = sortSelect.value;
+        const rows = Array.from(carTableBody.querySelectorAll("tr"));
+
+        rows.sort((a, b) => {
+          const priceA = parseFloat(a.dataset.price);
+          const priceB = parseFloat(b.dataset.price);
+          const yearA = parseInt(a.dataset.year);
+          const yearB = parseInt(b.dataset.year);
+
+          switch (sortType) {
+            case "priceAsc":
+              return priceA - priceB;
+            case "priceDesc":
+              return priceB - priceA;
+            case "yearAsc":
+              return yearA - yearB;
+            case "yearDesc":
+              return yearB - yearA;
+            default:
+              return 0;
+          }
+        });
+
+        carTableBody.innerHTML = "";
+        rows.forEach((row) => carTableBody.appendChild(row));
+      }
+    </script>
+    <script>
+      const toggleBtn = document.getElementById("darkModeToggle");
+
+      if (localStorage.getItem("darkMode") === "enabled") {
+        document.body.classList.add("dark-mode");
+        toggleBtn.textContent = "☀️ Light Mode";
+      }
+
+      toggleBtn.addEventListener("click", () => {
+        document.body.classList.toggle("dark-mode");
+
+        if (document.body.classList.contains("dark-mode")) {
+          localStorage.setItem("darkMode", "enabled");
+          toggleBtn.textContent = "☀️ Light Mode";
+        } else {
+          localStorage.setItem("darkMode", "disabled");
+          toggleBtn.textContent = "🌙 Dark Mode";
+        }
+      });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
